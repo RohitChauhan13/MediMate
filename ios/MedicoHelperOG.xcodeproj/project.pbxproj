@@ -13,6 +13,12 @@
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		2F606B17416143EE877AF27E /* BootSplash.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C7DF991670FD411D965D1922 /* BootSplash.storyboard */; };
 		84D7286A96FC41B3BB17A30F /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 46EF5A7B56004DB1A11EC3C5 /* Colors.xcassets */; };
+		717D5F2C133A455990C61002 /* DancingScript-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8BD7030EAB034A1C87684F46 /* DancingScript-Regular.ttf */; };
+		30B27D403C4B4AEFADA6EBDE /* GreatVibes-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C45EF6B656D444AB82B6A3E8 /* GreatVibes-Regular.ttf */; };
+		56C71C23C48F4342985DD924 /* IndieFlower-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B43AD115C6074D9A85FB4A2F /* IndieFlower-Regular.ttf */; };
+		9334EF6C757340B4974E7C1C /* Merienda-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 65FD1055889848448AF20F6A /* Merienda-Regular.ttf */; };
+		F59C482EE65841BC9F6B8624 /* PlaywriteES-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9D168735523C40DC8B4A0E06 /* PlaywriteES-Regular.ttf */; };
+		2B45C07D68694FD49196ABFB /* StoryScript-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FE760D0352EE4278A54DF16F /* StoryScript-Regular.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +34,12 @@
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		C7DF991670FD411D965D1922 /* BootSplash.storyboard */ = {isa = PBXFileReference; name = "BootSplash.storyboard"; path = "MedicoHelperOG/BootSplash.storyboard"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		46EF5A7B56004DB1A11EC3C5 /* Colors.xcassets */ = {isa = PBXFileReference; name = "Colors.xcassets"; path = "MedicoHelperOG/Colors.xcassets"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = folder.assetcatalog; explicitFileType = undefined; includeInIndex = 0; };
+		8BD7030EAB034A1C87684F46 /* DancingScript-Regular.ttf */ = {isa = PBXFileReference; name = "DancingScript-Regular.ttf"; path = "../src/assets/fonts/DancingScript-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		C45EF6B656D444AB82B6A3E8 /* GreatVibes-Regular.ttf */ = {isa = PBXFileReference; name = "GreatVibes-Regular.ttf"; path = "../src/assets/fonts/GreatVibes-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		B43AD115C6074D9A85FB4A2F /* IndieFlower-Regular.ttf */ = {isa = PBXFileReference; name = "IndieFlower-Regular.ttf"; path = "../src/assets/fonts/IndieFlower-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		65FD1055889848448AF20F6A /* Merienda-Regular.ttf */ = {isa = PBXFileReference; name = "Merienda-Regular.ttf"; path = "../src/assets/fonts/Merienda-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		9D168735523C40DC8B4A0E06 /* PlaywriteES-Regular.ttf */ = {isa = PBXFileReference; name = "PlaywriteES-Regular.ttf"; path = "../src/assets/fonts/PlaywriteES-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		FE760D0352EE4278A54DF16F /* StoryScript-Regular.ttf */ = {isa = PBXFileReference; name = "StoryScript-Regular.ttf"; path = "../src/assets/fonts/StoryScript-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,6 +92,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
+				5393A47184AE4A9F800399A3 /* Resources */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -102,6 +115,20 @@
 			);
 			path = Pods;
 			sourceTree = "<group>";
+		};
+		5393A47184AE4A9F800399A3 /* Resources */ = {
+			isa = "PBXGroup";
+			children = (
+				8BD7030EAB034A1C87684F46 /* DancingScript-Regular.ttf */,
+				C45EF6B656D444AB82B6A3E8 /* GreatVibes-Regular.ttf */,
+				B43AD115C6074D9A85FB4A2F /* IndieFlower-Regular.ttf */,
+				65FD1055889848448AF20F6A /* Merienda-Regular.ttf */,
+				9D168735523C40DC8B4A0E06 /* PlaywriteES-Regular.ttf */,
+				FE760D0352EE4278A54DF16F /* StoryScript-Regular.ttf */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+			path = "";
 		};
 /* End PBXGroup section */
 
@@ -167,6 +194,12 @@
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				2F606B17416143EE877AF27E /* BootSplash.storyboard in Resources */,
 				84D7286A96FC41B3BB17A30F /* Colors.xcassets in Resources */,
+				717D5F2C133A455990C61002 /* DancingScript-Regular.ttf in Resources */,
+				30B27D403C4B4AEFADA6EBDE /* GreatVibes-Regular.ttf in Resources */,
+				56C71C23C48F4342985DD924 /* IndieFlower-Regular.ttf in Resources */,
+				9334EF6C757340B4974E7C1C /* Merienda-Regular.ttf in Resources */,
+				F59C482EE65841BC9F6B8624 /* PlaywriteES-Regular.ttf in Resources */,
+				2B45C07D68694FD49196ABFB /* StoryScript-Regular.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

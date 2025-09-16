@@ -10,6 +10,7 @@ import {
     Keyboard,
     TouchableOpacity,
     RefreshControl,
+    Image,
 } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { TextInput as TI } from 'react-native';
@@ -102,6 +103,11 @@ const Home: React.FC = () => {
         >
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={styles.container}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                        <Image source={require('../img/logo.png')} style={styles.imgLogo} />
+                        <Text style={styles.title}>Medimate</Text>
+                        <Text style={styles.tagLine}>made with 💓</Text>
+                    </View>
                     <View style={{
                         flexDirection: 'row',
                         justifyContent: 'space-between',
@@ -120,7 +126,7 @@ const Home: React.FC = () => {
                         >
                             {
                                 !search ? null :
-                                    <AntDesign name='close-circle' size={40} />
+                                    <AntDesign name='close-circle' size={35} />
                             }
                         </TouchableOpacity>
                     </View>
@@ -204,7 +210,7 @@ const styles = StyleSheet.create({
     },
     search: {
         backgroundColor: '#eec841ff',
-        padding: 15,
+        padding: 10,
         borderRadius: 25,
         fontSize: 18,
         paddingLeft: 25
@@ -231,6 +237,24 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: 'black',
     },
+    imgLogo: {
+        width: 50,
+        height: 50,
+        borderRadius: 50,
+        marginRight: 10,
+    },
+    title: {
+        fontSize: 25,
+        fontFamily: 'Merienda-Regular',
+        fontWeight: '600',
+        color: 'black'
+    },
+    tagLine: {
+        marginTop: 15,
+        marginLeft: 3,
+        fontFamily: 'GreatVibes-Regular',
+        fontSize: 18
+    }
 });
 
 export default Home;

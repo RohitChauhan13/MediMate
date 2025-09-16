@@ -116,6 +116,7 @@ const Add = () => {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     margin: 10,
+                    marginTop: 20
                 }}
             >
                 <TI
@@ -150,6 +151,7 @@ const Add = () => {
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderItem}
                 contentContainerStyle={{ padding: 15 }}
+                showsVerticalScrollIndicator={false}
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={fetchWishlist} />
                 }
@@ -191,7 +193,7 @@ const styles = StyleSheet.create({
     },
     search: {
         backgroundColor: '#eec841ff',
-        padding: 15,
+        padding: 10,
         borderRadius: 25,
         fontSize: 18,
         paddingLeft: 25
@@ -201,7 +203,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#eec841ff',
         paddingHorizontal: 10,
-        paddingVertical: 15,
+        paddingVertical: 10,
         borderRadius: 8,
     },
 });

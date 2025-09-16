@@ -1,0 +1,29 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/DancingScript-Regular.ttf",
+      "sha1": "a6c3a9b286cacd1efeef62942fff748cfd8b9722"
+    },
+    {
+      "path": "src/assets/fonts/GreatVibes-Regular.ttf",
+      "sha1": "1c5136fcb8820617e2209f75f7f0a413b34be410"
+    },
+    {
+      "path": "src/assets/fonts/IndieFlower-Regular.ttf",
+      "sha1": "dab8ff786dd1c6a3e8fa8a54d4d59cf9a703efe1"
+    },
+    {
+      "path": "src/assets/fonts/Merienda-Regular.ttf",
+      "sha1": "3531342a1655304dc3cbf245b01f255aad58da25"
+    },
+    {
+      "path": "src/assets/fonts/PlaywriteES-Regular.ttf",
+      "sha1": "a71bebb9d9e105fd6d4ef92d6b31ec5ef52b95bb"
+    },
+    {
+      "path": "src/assets/fonts/StoryScript-Regular.ttf",
+      "sha1": "805c17e9834208f76dcf1e609802021481361fbf"
+    }
+  ]
+}

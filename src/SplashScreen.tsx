@@ -1,13 +1,31 @@
-import React, { useEffect } from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { Animated, StyleSheet, Text, View } from "react-native";
 import { getUser } from '../AsyncStorage/asyncStorage';
 import { Reducers, useDispatch } from "../redux/Index";
-import Ionicons from '@react-native-vector-icons/ionicons';
+import Ionicons from '@react-native-vector-icons/ionicons'; // Capital "I"
 
 const SplashScreen = () => {
     const dispatch = useDispatch();
 
+    // Animated values
+    const scaleAnim = useRef(new Animated.Value(0)).current;
+    const opacityAnim = useRef(new Animated.Value(0)).current;
+
     useEffect(() => {
+        // Run animation
+        Animated.parallel([
+            Animated.spring(scaleAnim, {
+                toValue: 1.2,
+                friction: 3,
+                useNativeDriver: true,
+            }),
+            Animated.timing(opacityAnim, {
+                toValue: 1.2,
+                duration: 2000,
+                useNativeDriver: true,
+            }),
+        ]).start();
+
         const checkUser = async () => {
             const data = await getUser();
             if (data) {
@@ -17,13 +35,19 @@ const SplashScreen = () => {
                 dispatch(Reducers.setSplashScreenStatus(false));
             }
         };
-        const timer = setTimeout(checkUser, 1500);
+
+        const timer = setTimeout(checkUser, 2500);
         return () => clearTimeout(timer);
     }, []);
+
     return (
         <View style={styles.container}>
-            <Ionicons name='medkit' size={150} />
-            <Text style={{ fontSize: 40, color: 'black' }}>MediMate</Text>
+            <Animated.View style={{ transform: [{ scale: scaleAnim }], opacity: opacityAnim }}>
+                <Ionicons name="medkit" size={150} color="#eec841ff" />
+            </Animated.View>
+            <Animated.Text style={[styles.title, { opacity: opacityAnim }]}>
+                MediMate
+            </Animated.Text>
         </View>
     );
 };
@@ -31,15 +55,16 @@ const SplashScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#ffffff',
-        padding: 20
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#ffffff",
     },
-    img: {
-        height: '50%',
-        width: '100%'
-    }
+    title: {
+        fontSize: 40,
+        color: "black",
+        marginTop: 10,
+        fontFamily: 'Merienda-Regular'
+    },
 });
 
 export default SplashScreen;
