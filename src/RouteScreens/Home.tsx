@@ -106,7 +106,7 @@ const Home: React.FC = () => {
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
                         <Image source={require('../img/logo.png')} style={styles.imgLogo} />
                         <Text style={styles.title}>Medimate</Text>
-                        <Text style={styles.tagLine}>made with 💓</Text>
+                        <Text style={styles.tagLine}>made with  ♡</Text>
                     </View>
                     <View style={{
                         flexDirection: 'row',
