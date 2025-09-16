@@ -1,0 +1,209 @@
+import React, { useEffect, useState } from 'react';
+import {
+    View,
+    Text,
+    Alert,
+    FlatList,
+    StyleSheet,
+    TouchableOpacity,
+    RefreshControl,
+    TextInput as TI
+} from 'react-native';
+import { TextInput } from 'react-native-paper';
+import CustomeBtnWishlist from '../Components/CustomeBtnWishlist';
+import AddItemsToWishlist from '../Screens/AddItemsToWishlist';
+import EditWishlistModal from '../Screens/EditWishlistModal';
+import axios from 'axios';
+import { useSelector, useDispatch, Reducers } from '../../redux/Index';
+import AntDesign from '@react-native-vector-icons/ant-design';
+
+type Wishlist = {
+    id: number;
+    name: string;
+    medicines: string;
+    mobile: string;
+    qty: number;
+    created_at: string;
+};
+
+const Add = () => {
+    const [data, setData] = useState<Wishlist[]>([]);
+    const [filteredData, setFilteredData] = useState<Wishlist[]>([]);
+    const [selectedItem, setSelectedItem] = useState<Wishlist | null>(null);
+    const [editVisible, setEditVisible] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+    const [search, setSearch] = useState<string>('');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+    const refresh = useSelector((state: any) => state.auth.refresh);
+    const dispatch = useDispatch();
+
+    const fetchWishlist = async () => {
+        try {
+            if (!refreshing) setRefreshing(true);
+            const res = await axios.get('https://rohitsbackend.onrender.com/show-wishlist');
+            if (res.data.success) {
+                const sorted = res.data.data.sort(
+                    (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                );
+                setData(sorted);
+                setFilteredData(sorted);
+            }
+        } catch (error) {
+            Alert.alert('Something went wrong', 'Please check your internet connection');
+        } finally {
+            setRefreshing(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchWishlist();
+        if (refresh) {
+            dispatch(Reducers.setRefresh(false));
+        }
+    }, [refresh]);
+
+    // search + sort filter logic
+    useEffect(() => {
+        let temp = [...data];
+
+        // search filter
+        if (search.trim() !== '') {
+            const lower = search.toLowerCase();
+            temp = temp.filter(
+                (item) =>
+                    item.name.toLowerCase().includes(lower) ||
+                    item.medicines.toLowerCase().includes(lower) ||
+                    (item.mobile && item.mobile.toLowerCase().includes(lower))
+            );
+        }
+
+        // sort filter
+        temp.sort((a, b) => {
+            const dateA = new Date(a.created_at).getTime();
+            const dateB = new Date(b.created_at).getTime();
+            return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+        });
+
+        setFilteredData(temp);
+    }, [data, search, sortOrder]);
+
+    const renderItem = ({ item }: { item: Wishlist }) => {
+        const formattedDate = new Date(item.created_at).toDateString();
+        return (
+            <TouchableOpacity
+                style={styles.card}
+                onPress={() => {
+                    setSelectedItem(item);
+                    setEditVisible(true);
+                }}
+            >
+                <Text style={styles.title}>{item.name}</Text>
+                <Text>Medicines: {item.medicines}</Text>
+                <Text>Mobile: {item.mobile || 'not available'}</Text>
+                <Text>Quantity: {item.qty || 'not available'}</Text>
+                <Text>Date: {formattedDate}</Text>
+            </TouchableOpacity>
+        );
+    };
+
+    return (
+        <View style={{ flex: 1, backgroundColor: '#9da2a5ff' }}>
+            {/* Search + Sort Row */}
+            <View
+                style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    margin: 10,
+                }}
+            >
+                <TI
+                    placeholder="Search wishlist..."
+                    value={search}
+                    onChangeText={setSearch}
+                    placeholderTextColor={'black'}
+                    style={[styles.search, { width: search ? '60%' : '70%' }]}
+                />
+                {search ? (
+                    <TouchableOpacity onPress={() => setSearch('')}>
+                        <AntDesign name="close-circle" size={30} style={{ marginRight: 10 }} />
+                    </TouchableOpacity>
+                ) : null}
+                <TouchableOpacity
+                    style={styles.sortBtn}
+                    onPress={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                >
+                    <AntDesign
+                        name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
+                        size={20}
+                        color="black"
+                    />
+                    <Text style={{ color: 'black', marginLeft: 5 }}>
+                        {sortOrder === 'asc' ? 'Oldest' : 'Newest'}
+                    </Text>
+                </TouchableOpacity>
+            </View>
+
+            <FlatList
+                data={filteredData}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={renderItem}
+                contentContainerStyle={{ padding: 15 }}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={fetchWishlist} />
+                }
+                ListEmptyComponent={
+                    <View style={{ flex: 1, marginTop: 50 }}>
+                        <Text style={{ alignSelf: 'center', fontSize: 20, color: '#555' }}>
+                            No data available
+                        </Text>
+                    </View>
+                }
+            />
+
+            <CustomeBtnWishlist />
+            <AddItemsToWishlist />
+
+            {/* Edit / Delete Modal */}
+            <EditWishlistModal
+                visible={editVisible}
+                item={selectedItem}
+                onClose={() => setEditVisible(false)}
+            />
+        </View>
+    );
+};
+
+const styles = StyleSheet.create({
+    card: {
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 15,
+        marginBottom: 10,
+        elevation: 2,
+    },
+    title: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 5,
+        color: '#333',
+    },
+    search: {
+        backgroundColor: '#eec841ff',
+        padding: 15,
+        borderRadius: 25,
+        fontSize: 18,
+        paddingLeft: 25
+    },
+    sortBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#eec841ff',
+        paddingHorizontal: 10,
+        paddingVertical: 15,
+        borderRadius: 8,
+    },
+});
+
+export default Add;

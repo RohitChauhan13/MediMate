@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "448368260620",
+    "project_id": "medimate-e18ed",
+    "storage_bucket": "medimate-e18ed.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:448368260620:android:8f9e2f3526885073a46029",
+        "android_client_info": {
+          "package_name": "com.medicohelperog"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpEulBbYktroYt5MrRDQGDFEkCJpF3wGs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
