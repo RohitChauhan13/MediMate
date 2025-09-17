@@ -12,7 +12,6 @@ import {
     RefreshControl,
     Image,
 } from 'react-native';
-import { TextInput } from 'react-native-paper';
 import { TextInput as TI } from 'react-native';
 import CustomeBtn from '../Components/CustomeBtn';
 import AddCustomerModal from '../Screens/AddCustomerModal';
@@ -21,6 +20,11 @@ import axios from 'axios';
 import { useSelector, useDispatch, Reducers } from '../../redux/Index';
 import Toast from '../Components/Toast';
 import AntDesign from '@react-native-vector-icons/ant-design';
+import { requestNotificationPermission, getFcmToken } from '../Notification/notificationServise';
+import messaging from '@react-native-firebase/messaging';
+import { Alert } from 'react-native';
+import { onDisplayNotification } from '../Notification/notifee';
+import { checkAndRequestPermissions } from '../permissions/permissionAsk';
 
 interface Customer {
     id: number;
@@ -39,6 +43,35 @@ const Home: React.FC = () => {
     const refresh = useSelector((state: any) => state.auth.refresh);
     const [selectedUser, setSelectedUser] = useState<Customer | null>(null);
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        const requestPerms = async () => {
+            const granted = await checkAndRequestPermissions();
+            if (!granted) {
+                console.log("Some permissions not granted. Will ask again next time.");
+            }
+        };
+        requestPerms();
+    }, []);
+
+    useEffect(() => {
+        const setupNotifications = async () => {
+            const hasPermission = await requestNotificationPermission();
+            if (hasPermission) {
+                const token = await getFcmToken();
+            }
+        };
+        setupNotifications();
+    }, []);
+
+    useEffect(() => {
+        const unsubscribe = messaging().onMessage(async remoteMessage => {
+            console.log('Foreground Message:', remoteMessage);
+            onDisplayNotification(remoteMessage?.notification?.title || '', remoteMessage?.notification?.body || '');
+        });
+
+        return unsubscribe;
+    }, []);
 
     const fetchUsers = useCallback(async () => {
         dispatch(Reducers.setLoading(true));

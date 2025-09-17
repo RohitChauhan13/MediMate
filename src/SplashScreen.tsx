@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { Animated, StyleSheet, Text, View } from "react-native";
 import { getUser } from '../AsyncStorage/asyncStorage';
 import { Reducers, useDispatch } from "../redux/Index";
-import Ionicons from '@react-native-vector-icons/ionicons'; // Capital "I"
+import Ionicons from '@react-native-vector-icons/ionicons';
 
 const SplashScreen = () => {
     const dispatch = useDispatch();

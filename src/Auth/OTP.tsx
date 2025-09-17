@@ -6,7 +6,8 @@ import axios from 'axios';
 import { Reducers, useDispatch } from '../../redux/Index';
 import { signUpWithEmail } from '../../Firebase/SignUpFirebase';
 import Toast from '../Components/Toast';
-import { saveUser } from '../../AsyncStorage/asyncStorage';
+import { getUser, saveUser } from '../../AsyncStorage/asyncStorage';
+import { getFcmToken } from '../Notification/notificationServise';
 
 type StackParamList = {
     Login: undefined;
@@ -29,6 +30,23 @@ const OTP = () => {
     const route = useRoute<OtpRouteProp>();
     const dispatch = useDispatch();
     const { email, password, name } = route.params;
+
+    const sendTokenToBackend = async () => {
+        try {
+            const token = await getFcmToken();
+            const email = await getUser();
+            if (token) {
+                const response = await axios.post("https://rohitsbackend.onrender.com/add-token", {
+                    email,
+                    token,
+                });
+
+                console.log("Token saved:", response.data);
+            }
+        } catch (error: any) {
+            console.error("Error saving token:", error.message);
+        }
+    };
 
     // Disable hardware back
     useEffect(() => {
@@ -93,6 +111,7 @@ const OTP = () => {
             });
             if (res.data.success) {
                 await handleSignUp();
+                await sendTokenToBackend();
             }
             else {
                 Toast(res.data.message || 'Invalid OTP');

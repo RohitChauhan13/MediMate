@@ -5,9 +5,11 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AntDesign from '@react-native-vector-icons/ant-design';
 import { loginWithEmail } from '../../Firebase/Login';
-import { saveUser } from '../../AsyncStorage/asyncStorage';
+import { getUser, saveUser } from '../../AsyncStorage/asyncStorage';
 import { Reducers, useDispatch } from '../../redux/Index';
 import Toast from '../Components/Toast';
+import { getFcmToken } from '../Notification/notificationServise';
+import axios from 'axios';
 
 type StackParamList = {
     Login: undefined;
@@ -42,11 +44,29 @@ const Login = () => {
         const res = await loginWithEmail(email, pass);
         if (res.success) {
             await saveUser(email);
+            await sendTokenToBackend();
             dispatch(Reducers.setUser(true));
         } else {
             Toast('Invalid email or password');
         }
         dispatch(Reducers.setLoading(false))
+    };
+
+    const sendTokenToBackend = async () => {
+        try {
+            const token = await getFcmToken();
+            const email = await getUser();
+            if (token) {
+                const response = await axios.post("https://rohitsbackend.onrender.com/add-token", {
+                    email,
+                    token,
+                });
+
+                console.log("Token saved:", response.data);
+            }
+        } catch (error: any) {
+            console.error("Error saving token:", error.message);
+        }
     };
 
     return (
