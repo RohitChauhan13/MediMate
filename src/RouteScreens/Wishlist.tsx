@@ -108,15 +108,16 @@ const Add = () => {
     };
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#9da2a5ff' }}>
+        <View style={{ flex: 1, backgroundColor: '#e1e3e5ff' }}>
             {/* Search + Sort Row */}
             <View
                 style={{
                     flexDirection: 'row',
-                    justifyContent: 'space-between',
+                    justifyContent: 'center',
                     alignItems: 'center',
                     margin: 10,
-                    marginTop: 20
+                    marginTop: 20,
+                    gap: 10
                 }}
             >
                 <TI
@@ -124,11 +125,11 @@ const Add = () => {
                     value={search}
                     onChangeText={setSearch}
                     placeholderTextColor={'black'}
-                    style={[styles.search, { width: search ? '60%' : '70%' }]}
+                    style={[styles.search, { width: search ? '55%' : '65%' }]}
                 />
                 {search ? (
                     <TouchableOpacity onPress={() => setSearch('')}>
-                        <AntDesign name="close-circle" size={30} style={{ marginRight: 10 }} />
+                        <AntDesign name="close-circle" size={30} />
                     </TouchableOpacity>
                 ) : null}
                 <TouchableOpacity
@@ -183,7 +184,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 15,
         marginBottom: 10,
-        elevation: 2,
+        elevation: 8,
     },
     title: {
         fontSize: 18,
@@ -192,11 +193,12 @@ const styles = StyleSheet.create({
         color: '#333',
     },
     search: {
-        backgroundColor: '#eec841ff',
+        backgroundColor: 'white',
         padding: 10,
-        borderRadius: 25,
+        borderRadius: 8,
         fontSize: 18,
-        paddingLeft: 25
+        paddingLeft: 25,
+        elevation: 8
     },
     sortBtn: {
         flexDirection: 'row',
@@ -205,6 +207,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         paddingVertical: 10,
         borderRadius: 8,
+        elevation: 10,
     },
 });
 

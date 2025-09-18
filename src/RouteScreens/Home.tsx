@@ -143,9 +143,10 @@ const Home: React.FC = () => {
                     </View>
                     <View style={{
                         flexDirection: 'row',
-                        justifyContent: 'space-between',
+                        justifyContent: 'center',
                         alignItems: 'center',
-                        marginBottom: 10
+                        marginBottom: 10,
+                        gap: search ? 10 : 0
                     }}>
                         <TI
                             placeholder="Search customer.."
@@ -239,21 +240,22 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 10,
         paddingTop: 10,
-        backgroundColor: '#9da2a5ff',
+        backgroundColor: '#e1e3e5ff',
     },
     search: {
-        backgroundColor: '#eec841ff',
+        backgroundColor: 'white',
         padding: 10,
-        borderRadius: 25,
+        borderRadius: 8,
         fontSize: 18,
-        paddingLeft: 25
+        paddingLeft: 25,
+        elevation: 8
     },
     card: {
         backgroundColor: 'white',
         padding: 15,
         marginBottom: 10,
         borderRadius: 10,
-        elevation: 2,
+        elevation: 8,
     },
     name: {
         fontSize: 18,
@@ -277,16 +279,16 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     title: {
-        fontSize: 25,
+        fontSize: 28,
         fontFamily: 'Merienda-Regular',
         fontWeight: '600',
-        color: 'black'
+        color: 'black',
     },
     tagLine: {
-        marginTop: 15,
+        marginTop: 18,
         marginLeft: 3,
         fontFamily: 'GreatVibes-Regular',
-        fontSize: 18
+        fontSize: 20
     }
 });
 

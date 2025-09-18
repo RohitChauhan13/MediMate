@@ -7,6 +7,7 @@ import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { setUser } from '../../redux/MySlice';
 import { TextInput } from 'react-native-paper';
 import Toast from '../Components/Toast';
+import axios from 'axios';
 
 const Profile = () => {
     const [fullName, setFullName] = useState('');
@@ -36,8 +37,33 @@ const Profile = () => {
         loadData();
     }, []);
 
+    const removeTokenFromDB = async () => {
+        try {
+            const userEmail = await getUser();
+            if (!userEmail) {
+                console.log("User email not found");
+                return false;
+            }
+            const result = await axios.delete("https://rohitsbackend.onrender.com/remove-token", {
+                data: { email: userEmail },
+            });
+            if (result.data.success) {
+                console.log("Token removed:", result.data);
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (error: any) {
+            console.error("Error in removeTokenFromDB:", error.response?.data || error.message);
+            return false;
+        }
+    };
+
+
     const handleLogout = async () => {
         dispatch(Reducers.setLoading(true));
+        await removeTokenFromDB();
         await removeUser();
         await removeProfileImage();
         await removeUserFullName();
@@ -174,6 +200,7 @@ const Profile = () => {
                     <View style={styles.modalContainer}>
                         <Text style={styles.modalText}>Change Your Name</Text>
                         <TextInput
+                            autoFocus={true}
                             mode='outlined'
                             placeholder="Enter new name"
                             value={newFullName}
@@ -213,12 +240,12 @@ const Profile = () => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 20, justifyContent: 'space-between', backgroundColor: '#9da2a5ff' },
+    container: { flex: 1, padding: 20, justifyContent: 'space-between', backgroundColor: '#e1e3e5ff' },
     content: { alignItems: 'center', marginTop: 50 },
     header: { fontSize: 24, fontWeight: 'bold', color: 'black' },
-    profileImageContainer: { justifyContent: 'center', alignItems: 'center', marginTop: 20, borderRadius: 100, width: 200, height: 200, backgroundColor: '#eec841ff', overflow: 'hidden' },
+    profileImageContainer: { justifyContent: 'center', alignItems: 'center', marginTop: 20, borderRadius: 100, width: 200, height: 200, overflow: 'hidden', elevation: 10 },
     profileImage: { width: '100%', height: '100%', borderRadius: 100 },
-    logoutBtn: { backgroundColor: '#eec841ff', paddingVertical: 12, borderRadius: 10, alignItems: 'center' },
+    logoutBtn: { backgroundColor: 'tomato', paddingVertical: 12, borderRadius: 10, alignItems: 'center' },
     logoutText: { color: 'black', fontSize: 18, fontWeight: 'bold' },
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
     modalContainer: { width: '80%', backgroundColor: '#fff', borderRadius: 10, padding: 20, alignItems: 'center' },

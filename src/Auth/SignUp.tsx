@@ -58,10 +58,10 @@ const SignUp = () => {
     };
 
     return (
-        <View style={{ flex: 1, padding: 15, backgroundColor: '#9da2a5ff' }}>
+        <View style={{ flex: 1, padding: 15, backgroundColor: '#e1e3e5ff' }}>
             <View style={styles.form}>
-                <Text style={styles.header}>Welcome</Text>
-
+                <Text style={{ fontSize: 18, alignSelf: 'center', fontWeight: '600' }}>Welcome to</Text>
+                <Text style={styles.header}>Medimate</Text>
                 <TextInput
                     autoFocus={true}
                     ref={nameRef}
@@ -71,7 +71,7 @@ const SignUp = () => {
                     value={name}
                     keyboardType="default"
                     onChangeText={setName}
-                    style={{ marginTop: 20, marginHorizontal: 10 }}
+                    style={{ marginTop: 15, marginHorizontal: 10 }}
                 />
 
                 <TextInput
@@ -148,15 +148,14 @@ const SignUp = () => {
 const styles = StyleSheet.create({
     header: {
         fontSize: 30,
-        fontWeight: 'bold',
         alignSelf: 'center',
         color: 'blue',
+        fontFamily: 'Merienda-Regular',
     },
     form: {
-        borderWidth: 1,
         borderRadius: 12,
         width: '100%',
-        marginTop: '30%',
+        marginTop: '20%',
         padding: 10,
         backgroundColor: '#fff',
         elevation: 8,
@@ -187,7 +186,7 @@ const styles = StyleSheet.create({
     eye: {
         position: 'absolute',
         right: 32,
-        top: 240,
+        top: 273,
     },
 });
 

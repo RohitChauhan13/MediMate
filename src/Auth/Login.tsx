@@ -10,6 +10,7 @@ import { Reducers, useDispatch } from '../../redux/Index';
 import Toast from '../Components/Toast';
 import { getFcmToken } from '../Notification/notificationServise';
 import axios from 'axios';
+import { Image } from 'react-native';
 
 type StackParamList = {
     Login: undefined;
@@ -30,6 +31,30 @@ const Login = () => {
 
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
+    const addTokenToDB = async () => {
+        try {
+            const userToken = await getFcmToken();
+            const userEmail = await getUser();
+            if (!userToken || !userEmail) {
+                Toast("Email or token missing");
+                return false;
+            }
+            const res = await axios.post("https://rohitsbackend.onrender.com/add-token", {
+                email: userEmail,
+                token: userToken,
+            });
+            if (!res.data.success) {
+                return false;
+            }
+            console.log("Token saved:", res.data.data);
+            return true;
+        } catch (error: any) {
+            console.error("Error in addTokenToDB:", error.response?.data || error.message);
+            return false;
+        }
+    };
+
+
     const handleLogin = async () => {
         if (!email || !pass) {
             Toast('Please enter email and password');
@@ -39,40 +64,34 @@ const Login = () => {
             Toast('Please enter a valid email');
             return;
         }
-
-        dispatch(Reducers.setLoading(true))
-        const res = await loginWithEmail(email, pass);
-        if (res.success) {
-            await saveUser(email);
-            await sendTokenToBackend();
-            dispatch(Reducers.setUser(true));
-        } else {
-            Toast('Invalid email or password');
-        }
-        dispatch(Reducers.setLoading(false))
-    };
-
-    const sendTokenToBackend = async () => {
+        dispatch(Reducers.setLoading(true));
         try {
-            const token = await getFcmToken();
-            const email = await getUser();
-            if (token) {
-                const response = await axios.post("https://rohitsbackend.onrender.com/add-token", {
-                    email,
-                    token,
-                });
-
-                console.log("Token saved:", response.data);
+            const res = await loginWithEmail(email, pass);
+            if (res.success) {
+                await saveUser(email);
+                const tokenAdded = await addTokenToDB();
+                if (tokenAdded) {
+                    dispatch(Reducers.setUser(true));
+                    Toast("Login successful");
+                } else {
+                    Toast("User already logged in on another device");
+                }
+            } else {
+                Toast('Invalid email or password');
             }
         } catch (error: any) {
-            console.error("Error saving token:", error.message);
+            console.error("❌ Login error:", error.message);
+            Toast("Something went wrong during login");
+        } finally {
+            dispatch(Reducers.setLoading(false));
         }
     };
 
     return (
-        <View style={{ flex: 1, padding: 15, backgroundColor: '#9da2a5ff' }}>
+        <View style={{ flex: 1, padding: 15, backgroundColor: '#e1e3e5ff' }}>
             <View style={styles.form}>
-                <Text style={styles.header}>Medi Mate</Text>
+                {/* <Text style={styles.header}>Medimate</Text> */}
+                <Image source={require('../img/logo.png')} style={styles.img} />
 
                 <TextInput
                     autoFocus={true}
@@ -141,7 +160,7 @@ const styles = StyleSheet.create({
     form: {
         borderRadius: 12,
         width: '100%',
-        marginTop: '30%',
+        marginTop: '25%',
         padding: 10,
         backgroundColor: '#fff',
         elevation: 10,
@@ -174,6 +193,13 @@ const styles = StyleSheet.create({
         right: 20,
         top: 35,
     },
+    img: {
+        height: 100,
+        width: 100,
+        alignSelf: 'center',
+        borderRadius: 8,
+        elevation: 10
+    }
 });
 
 export default Login;
