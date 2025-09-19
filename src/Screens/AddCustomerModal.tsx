@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Modal, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { Reducers, useDispatch, useSelector } from '../../redux/Index';
 import Toast from '../Components/Toast';
 import axios from 'axios';
+import { getUser } from '../../AsyncStorage/asyncStorage';
 
 const AddCustomerModal = () => {
     const show = useSelector(state => state.auth.addModal);
@@ -16,6 +17,15 @@ const AddCustomerModal = () => {
     const [mobile, setMobile] = useState('');
     const [email, setEmail] = useState('');
     const [saving, setSaving] = useState(false);
+    const [username, setUsername] = useState<string | null>(null);
+
+    useEffect(() => {
+        const getUserName = async () => {
+            const email = await getUser();
+            setUsername(email);
+        }
+        getUserName();
+    }, [])
 
     const resetForm = () => {
         setName('');
@@ -45,7 +55,7 @@ const AddCustomerModal = () => {
             setSaving(true);
             dispatch(Reducers.setLoading(true));
 
-            const res = await axios.post('https://rohitsbackend.onrender.com/adduser', {
+            const res = await axios.post(`https://rohitsbackend.onrender.com/adduser/${username}`, {
                 name, email, mobile, medicines, address
             });
 

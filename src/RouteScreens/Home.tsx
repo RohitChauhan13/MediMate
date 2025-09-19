@@ -25,6 +25,7 @@ import messaging from '@react-native-firebase/messaging';
 import { Alert } from 'react-native';
 import { onDisplayNotification } from '../Notification/notifee';
 import { checkAndRequestPermissions } from '../permissions/permissionAsk';
+import { getUser } from '../../AsyncStorage/asyncStorage';
 
 interface Customer {
     id: number;
@@ -42,7 +43,16 @@ const Home: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const refresh = useSelector((state: any) => state.auth.refresh);
     const [selectedUser, setSelectedUser] = useState<Customer | null>(null);
+    const [username, setUsername] = useState<string | null>(null);
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        const getUserName = async () => {
+            const email = await getUser();
+            setUsername(email);
+        }
+        getUserName();
+    }, [])
 
     useEffect(() => {
         const requestPerms = async () => {
@@ -77,7 +87,7 @@ const Home: React.FC = () => {
         dispatch(Reducers.setLoading(true));
         try {
             setLoading(true);
-            const res = await axios.get('https://rohitsbackend.onrender.com/users');
+            const res = await axios.get(`https://rohitsbackend.onrender.com/users/${username}`);
             if (res.data.success) {
                 // Sort by ID in descending order to show newest first
                 const sortedUsers = res.data.users.sort((a: any, b: any) => b.id - a.id);

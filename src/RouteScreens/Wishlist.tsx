@@ -16,6 +16,7 @@ import EditWishlistModal from '../Screens/EditWishlistModal';
 import axios from 'axios';
 import { useSelector, useDispatch, Reducers } from '../../redux/Index';
 import AntDesign from '@react-native-vector-icons/ant-design';
+import { getUser } from '../../AsyncStorage/asyncStorage';
 
 type Wishlist = {
     id: number;
@@ -34,14 +35,23 @@ const Add = () => {
     const [refreshing, setRefreshing] = useState(false);
     const [search, setSearch] = useState<string>('');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+    const [username, setUsername] = useState<string | null>(null);
 
     const refresh = useSelector((state: any) => state.auth.refresh);
     const dispatch = useDispatch();
 
+    useEffect(() => {
+        const getUserName = async () => {
+            const email = await getUser();
+            setUsername(email);
+        }
+        getUserName();
+    }, [])
+
     const fetchWishlist = async () => {
         try {
             if (!refreshing) setRefreshing(true);
-            const res = await axios.get('https://rohitsbackend.onrender.com/show-wishlist');
+            const res = await axios.get(`https://rohitsbackend.onrender.com/show-wishlist/${username}`);
             if (res.data.success) {
                 const sorted = res.data.data.sort(
                     (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()

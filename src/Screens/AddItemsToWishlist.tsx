@@ -1,9 +1,10 @@
 import { View, Text, Modal, TouchableOpacity, StyleSheet, Alert } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch, Reducers } from '../../redux/Index';
 import { TextInput } from 'react-native-paper';
 import axios from 'axios';
 import Toast from '../Components/Toast';
+import { getUser } from '../../AsyncStorage/asyncStorage';
 
 const AddItemsToWishlist = () => {
     const [name, setName] = useState('');
@@ -12,6 +13,15 @@ const AddItemsToWishlist = () => {
     const [mobile, setMobile] = useState('');
     const dispatch = useDispatch();
     const show = useSelector((state: any) => state.auth.wishShowModal);
+    const [username, setUsername] = useState<string | null>(null);
+
+    useEffect(() => {
+        const getUserName = async () => {
+            const email = await getUser();
+            setUsername(email);
+        }
+        getUserName();
+    }, [])
 
     const resetFields = () => {
         setName('');
@@ -37,7 +47,7 @@ const AddItemsToWishlist = () => {
         }
 
         try {
-            const res = await axios.post('https://rohitsbackend.onrender.com/add-wishlist', {
+            const res = await axios.post(`https://rohitsbackend.onrender.com/add-wishlist/${username}`, {
                 name,
                 medicines,
                 mobile,

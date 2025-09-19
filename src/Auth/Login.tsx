@@ -45,16 +45,13 @@ const Login = () => {
                 token: userToken,
             });
 
-            // ✅ Case 1: Token already exists → still treat as success
-            if (res.data.success === false && res.data.message === "Token already exists") {
-                console.log("Token already exists, continuing login...");
-                return true;
-            }
-
-            // ✅ Case 2: Token inserted successfully
+            // ✅ Treat "already exists" as success
             if (res.data.success) {
                 console.log("Token saved:", res.data.data);
                 return true;
+            } else if (res.data.message === "Token already exists for this user") {
+                console.log("Token already exists, continuing login...");
+                return true; // ← treat as success
             }
 
             return false;
@@ -63,7 +60,6 @@ const Login = () => {
             return false;
         }
     };
-
 
     const handleLogin = async () => {
         if (!email || !pass) {
