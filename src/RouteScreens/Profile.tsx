@@ -8,6 +8,7 @@ import { setUser } from '../../redux/MySlice';
 import { TextInput } from 'react-native-paper';
 import Toast from '../Components/Toast';
 import axios from 'axios';
+import { getFcmToken } from '../Notification/notificationServise';
 
 const Profile = () => {
     const [fullName, setFullName] = useState('');
@@ -40,17 +41,22 @@ const Profile = () => {
     const removeTokenFromDB = async () => {
         try {
             const userEmail = await getUser();
-            if (!userEmail) {
-                console.log("User email not found");
+            const userToken = await getFcmToken();
+            if (!userEmail || !userToken) {
+                console.log("User email or token not found");
                 return false;
             }
-            const result = await axios.delete("https://rohitsbackend.onrender.com/remove-token", {
-                data: { email: userEmail },
-            });
+
+            const result = await axios.delete(
+                "https://rohitsbackend.onrender.com/remove-token",
+                { data: { email: userEmail, token: userToken } } // pass both email + token
+            );
+
             if (result.data.success) {
                 console.log("Token removed:", result.data);
                 return true;
             } else {
+                console.log("Token not found in DB:", result.data.message);
                 return false;
             }
 
