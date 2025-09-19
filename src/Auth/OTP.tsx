@@ -42,19 +42,24 @@ const OTP = () => {
                 return false;
             }
 
-            // Use the email from signup process since user just created account
             const res = await axios.post("https://rohitsbackend.onrender.com/add-token", {
-                email: email, // Use email from route params since user just signed up
+                email: email, // Use signup email
                 token: userToken,
             });
 
-            if (!res.data.success) {
-                console.error("Failed to save token:", res.data);
-                return false;
+            // Case 1: Token already exists → treat as success
+            if (res.data.success === false && res.data.message === "Token already exists") {
+                console.log("Token already exists, continuing signup...");
+                return true;
             }
 
-            console.log("Token saved successfully:", res.data.data);
-            return true;
+            // Case 2: Token saved successfully
+            if (res.data.success) {
+                console.log("Token saved:", res.data.data);
+                return true;
+            }
+
+            return false;
         } catch (error: any) {
             console.error("Error in addTokenToDB:", error.response?.data || error.message);
             return false;
@@ -215,31 +220,25 @@ const OTP = () => {
                 await saveUser(email);
                 dispatch(Reducers.setUser(true));
 
-                // Now that signup is successful, try to store the FCM token
-                // This happens after user is created and logged in
                 const tokenStored = await addTokenToDB();
                 if (!tokenStored) {
                     console.warn('Token storage failed, but signup was successful');
-                    // Don't show error to user since signup was successful
                 }
 
                 Toast('Account created successfully');
                 navigation.replace('Login');
             } else {
-                // Handle Firebase auth errors
                 const errorCode = res.error?.code;
-
                 if (errorCode === 'auth/email-already-in-use') {
-                    Toast('Email address is already in use');
+                    Toast('Email already in use');
                     navigation.replace('Login');
                 } else if (errorCode === 'auth/invalid-email') {
                     Toast('Invalid email address');
                 } else if (errorCode === 'auth/weak-password') {
-                    Toast('Password is too weak');
+                    Toast('Password too weak');
                 } else {
                     Toast(res.error?.message || 'Account creation failed');
                 }
-
                 console.error('Firebase signup error:', res.error);
             }
         } catch (err: any) {

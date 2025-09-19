@@ -39,15 +39,25 @@ const Login = () => {
                 Toast("Email or token missing");
                 return false;
             }
+
             const res = await axios.post("https://rohitsbackend.onrender.com/add-token", {
                 email: userEmail,
                 token: userToken,
             });
-            if (!res.data.success) {
-                return false;
+
+            // ✅ Case 1: Token already exists → still treat as success
+            if (res.data.success === false && res.data.message === "Token already exists") {
+                console.log("Token already exists, continuing login...");
+                return true;
             }
-            console.log("Token saved:", res.data.data);
-            return true;
+
+            // ✅ Case 2: Token inserted successfully
+            if (res.data.success) {
+                console.log("Token saved:", res.data.data);
+                return true;
+            }
+
+            return false;
         } catch (error: any) {
             console.error("Error in addTokenToDB:", error.response?.data || error.message);
             return false;
@@ -69,29 +79,31 @@ const Login = () => {
             const res = await loginWithEmail(email, pass);
             if (res.success) {
                 await saveUser(email);
+
                 const tokenAdded = await addTokenToDB();
                 if (tokenAdded) {
                     dispatch(Reducers.setUser(true));
                     Toast("Login successful");
                 } else {
-                    Toast("User already logged in on another device");
+                    Toast("Unable to save device token");
                 }
             } else {
                 Toast('Invalid email or password');
             }
         } catch (error: any) {
-            console.error("❌ Login error:", error.message);
+            console.error("Login error:", error.message);
             Toast("Something went wrong during login");
         } finally {
             dispatch(Reducers.setLoading(false));
         }
     };
 
+
     return (
         <View style={{ flex: 1, padding: 15, backgroundColor: '#e1e3e5ff' }}>
             <View style={styles.form}>
                 {/* <Text style={styles.header}>Medimate</Text> */}
-                <Image source={require('../img/logo.png')} style={styles.img} />
+                <Image source={require('../img/Media.jpg')} style={styles.img} />
 
                 <TextInput
                     autoFocus={true}
@@ -195,10 +207,8 @@ const styles = StyleSheet.create({
     },
     img: {
         height: 100,
-        width: 100,
+        width: 150,
         alignSelf: 'center',
-        borderRadius: 8,
-        elevation: 10
     }
 });
 
