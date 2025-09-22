@@ -45,6 +45,7 @@ const Home: React.FC = () => {
     const refresh = useSelector((state: any) => state.auth.refresh);
     const [selectedUser, setSelectedUser] = useState<Customer | null>(null);
     const [username, setUsername] = useState<string | null>(null);
+    const [unseenCount, setUnseenCount] = useState(0);
     const dispatch = useDispatch();
     const navigation = useNavigation();
 
@@ -53,7 +54,7 @@ const Home: React.FC = () => {
         const getUserName = async () => {
             try {
                 const email = await getUser();
-                console.log('Retrieved email:', email);
+                console.log('Retrieved email:', email); // Debug log
                 setUsername(email);
             } catch (error) {
                 console.error('Error getting user email:', error);
@@ -74,128 +75,25 @@ const Home: React.FC = () => {
         requestPerms();
     }, []);
 
-    // Register FCM token for multi-device support
     useEffect(() => {
         const setupNotifications = async () => {
-            if (!username) return;
-
             const hasPermission = await requestNotificationPermission();
             if (hasPermission) {
-                try {
-                    const token = await getFcmToken();
-                    if (token) {
-                        // Register this device's token with the user's email
-                        const response = await axios.post(
-                            'https://rohitsbackend.onrender.com/add-token',
-                            {
-                                email: username,
-                                token: token
-                            }
-                        );
-
-                        if (response.data.success) {
-                            console.log('Token registered successfully');
-                        } else {
-                            console.log('Token registration failed:', response.data.message);
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error registering token:', error);
-                }
+                const token = await getFcmToken();
             }
         };
-
         setupNotifications();
-    }, [username]);
-
-    // Handle token refresh
-    useEffect(() => {
-        if (!username) return;
-
-        const unsubscribe = messaging().onTokenRefresh(async (newToken) => {
-            try {
-                // First remove old token if exists
-                const oldToken = await getFcmToken();
-                if (oldToken && oldToken !== newToken) {
-                    await axios.delete('https://rohitsbackend.onrender.com/remove-token', {
-                        data: { email: username, token: oldToken }
-                    });
-                }
-
-                // Add new token
-                await axios.post('https://rohitsbackend.onrender.com/add-token', {
-                    email: username,
-                    token: newToken
-                });
-
-                console.log('Token refreshed successfully');
-            } catch (error) {
-                console.error('Error refreshing token:', error);
-            }
-        });
-
-        return unsubscribe;
-    }, [username]);
-
-    // Clean up token on logout
-    useEffect(() => {
-        return () => {
-            // This cleanup function will run when component unmounts
-            const cleanupToken = async () => {
-                if (username) {
-                    try {
-                        const token = await getFcmToken();
-                        if (token) {
-                            await axios.delete('https://rohitsbackend.onrender.com/remove-token', {
-                                data: { email: username, token: token }
-                            });
-                        }
-                    } catch (error) {
-                        console.error('Error removing token on cleanup:', error);
-                    }
-                }
-            };
-
-            // Only clean up if user is logging out, not on app background
-            // You might want to handle this differently based on your logout flow
-        };
-    }, [username]);
+    }, []);
 
     useEffect(() => {
         const unsubscribe = messaging().onMessage(async remoteMessage => {
             console.log('Foreground Message:', remoteMessage);
-            await saveNotificationIntoDb(remoteMessage?.notification?.title || '', remoteMessage?.notification?.body || '')
             onDisplayNotification(remoteMessage?.notification?.title || '', remoteMessage?.notification?.body || '');
         });
 
         return unsubscribe;
     }, []);
 
-    const saveNotificationIntoDb = useCallback(async (title: string, body: string) => {
-        try {
-            const email = await getUser();
-            if (!email) {
-                console.log('Cannot get email from asyncStorage');
-                return;
-            }
-
-            const result = await axios.post(
-                `https://rohitsbackend.onrender.com/add-notification/${email}`,
-                {
-                    title,
-                    body
-                }
-            );
-
-            if (result.data.success) {
-                console.log('Successfully notification saved');
-            } else {
-                console.log('Error while storing notification');
-            }
-        } catch (error) {
-            console.log('Error in saveNotificationIntoDb : ', error);
-        }
-    }, []);
 
     const fetchUsers = useCallback(async () => {
         if (!username) {
@@ -207,7 +105,6 @@ const Home: React.FC = () => {
         try {
             setLoading(true);
             console.log('Fetching users for:', username);
-
             const res = await axios.get(`https://rohitsbackend.onrender.com/users/${username}`);
 
             if (res.data.success) {
@@ -215,7 +112,7 @@ const Home: React.FC = () => {
                 const sortedUsers = res.data.users.sort((a: any, b: any) => b.id - a.id);
                 setData(sortedUsers);
                 setFilteredData(sortedUsers);
-                console.log('Users fetched successfully:', sortedUsers.length);
+                console.log('Users fetched successfully:', sortedUsers.length); // Debug log
             } else {
                 console.log('API returned success false:', res.data.message);
                 Toast(res.data.message || 'Failed to fetch users');
@@ -232,14 +129,14 @@ const Home: React.FC = () => {
             setLoading(false);
             dispatch(Reducers.setLoading(false));
         }
-    }, [username, dispatch]);
+    }, [username, dispatch]); // Add username as dependency
 
     // Fetch users only when username is available
     useEffect(() => {
         if (username) {
             fetchUsers();
         }
-    }, [username, refresh, fetchUsers]);
+    }, [username, refresh, fetchUsers]); // Trigger when username changes or refresh changes
 
     // Search filter
     useEffect(() => {
@@ -261,6 +158,24 @@ const Home: React.FC = () => {
     const handleSearch = (text: string) => {
         setSearch(text);
     };
+
+    const fetchUnseenCount = async () => {
+        if (!username) return;
+        try {
+            const res = await axios.get(`https://rohitsbackend.onrender.com/notifications/unseen/${username}`);
+            if (res.data.success) {
+                setUnseenCount(parseInt(res.data.count, 10));
+            }
+        } catch (err) {
+            console.log("Error fetching unseen count", err);
+        }
+    };
+
+    useEffect(() => {
+        if (username) {
+            fetchUnseenCount();
+        }
+    }, [username, refresh]);
 
     const renderItem = ({ item }: { item: Customer }) => (
         <TouchableOpacity onPress={() => setSelectedUser(item)}>
@@ -296,11 +211,33 @@ const Home: React.FC = () => {
                             <Text style={styles.title}>Medimate</Text>
                             <Text style={styles.tagLine}>made with  ♡</Text>
                         </View>
-                        <TouchableOpacity activeOpacity={0.7}
-                            onPress={() => navigation.navigate('Notification')}
+                        <TouchableOpacity
+                            activeOpacity={0.7}
+                            onPress={() => {
+                                navigation.navigate('Notification');
+                                setUnseenCount(0); // instantly hide dot (optional)
+                            }}
+                            style={{ marginRight: 10 }}
                         >
-                            <Ionicons name='notifications-sharp' size={30} style={{ marginRight: 10 }} />
+                            <View>
+                                <Ionicons name="notifications-sharp" size={30} />
+                                {unseenCount > 0 && (
+                                    <View
+                                        style={{
+                                            position: 'absolute',
+                                            right: -2,
+                                            top: -5,
+                                            backgroundColor: 'red',
+                                            borderRadius: 6,
+                                            width: 10,
+                                            height: 10
+                                            ,
+                                        }}
+                                    />
+                                )}
+                            </View>
                         </TouchableOpacity>
+
                     </View>
                     <View style={{
                         flexDirection: 'row',

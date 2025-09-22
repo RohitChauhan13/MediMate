@@ -5,18 +5,21 @@ import Ionicons from '@react-native-vector-icons/ionicons';
 import axios from 'axios';
 import { getUser } from '../../AsyncStorage/asyncStorage';
 import Toast from '../Components/Toast';
+import AntDesign from '@react-native-vector-icons/ant-design';
+import { red100 } from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
 
 interface NData {
     id: number;
     notificationtitle: string;
     notificationbody: string;
     notificationfor: string;
-    createdat: string;
+    created_at: string;
 }
 
 const NotificationScreen = () => {
-    const [nData, setNData] = useState<NData[]>([])
+    const [nData, setNData] = useState<NData[]>([]);
     const [username, setUsername] = useState('');
+    const [selectedItem, setSelectedItem] = useState<NData | null>(null);
     const navigation = useNavigation();
 
     const getNotifications = async () => {
@@ -68,13 +71,45 @@ const NotificationScreen = () => {
         return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
+    useEffect(() => {
+        if (username) {
+            getNotifications();
+            axios.put(`https://rohitsbackend.onrender.com/notifications/mark-seen/${username}`)
+                .then(res => console.log(res.data.message))
+                .catch(err => console.log("Error marking seen:", err));
+        }
+    }, [username]);
+
+    const handleDelete = async (item: NData) => {
+        const email = await getUser();
+        try {
+            const res = await axios.delete('https://rohitsbackend.onrender.com/delete-notification', {
+                data: { email, id: item.id }
+            });
+            if (res.data.success) {
+                Toast('Notification deleted');
+                setNData(prev => prev.filter(n => n.id !== item.id));
+                console.log('Deleted item data:', item);
+            }
+        } catch (error) {
+            Toast('Failed to delete notification');
+            console.log(error);
+        }
+    };
+
+
     const renderNotification = ({ item }: { item: NData }) => (
         <View style={styles.card}>
             <View style={styles.cardHeader}>
                 <Text style={styles.title}>{item.notificationtitle}</Text>
-                <Text style={styles.date}>{formatDate(item.createdat)}</Text>
+                <Text style={styles.date}>{formatDate(item.created_at)}</Text>
             </View>
             <Text style={styles.body}>{item.notificationbody}</Text>
+            <TouchableOpacity activeOpacity={0.8}
+                onPress={() => handleDelete(item)}
+            >
+                <AntDesign name='delete' size={20} color={"red"} />
+            </TouchableOpacity>
         </View>
     );
 
