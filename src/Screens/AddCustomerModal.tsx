@@ -55,20 +55,24 @@ const AddCustomerModal = () => {
             setSaving(true);
             dispatch(Reducers.setLoading(true));
 
-            const res = await axios.post(`https://rohitsbackend.onrender.com/adduser/${username}`, {
-                name, email, mobile, medicines, address
-            });
+            const res = await axios.post(
+                `https://rohitsbackend.onrender.com/adduser/${username}`,
+                { name, email, mobile, medicines, address }
+            );
 
             if (res.data.success) {
                 Toast(res.data.message);
-                // Toggle refresh state to trigger re-fetch
                 dispatch(Reducers.setRefresh(!refresh));
                 handleClose();
             } else {
                 Toast(res.data.message);
             }
-        } catch (err) {
-            Toast('Something went wrong!');
+        } catch (err: any) {
+            if (err.response?.data?.message === "Mobile number already exists") {
+                Toast("Number already exists");
+            } else {
+                Toast("Something went wrong!");
+            }
         } finally {
             setSaving(false);
             dispatch(Reducers.setLoading(false));

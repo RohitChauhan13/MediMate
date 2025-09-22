@@ -6,7 +6,8 @@ import axios from 'axios';
 import { getUser } from '../../AsyncStorage/asyncStorage';
 import Toast from '../Components/Toast';
 import AntDesign from '@react-native-vector-icons/ant-design';
-import { red100 } from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
+import { useDispatch, Reducers } from '../../redux/Index';
+import reducer from '../../redux/MySlice';
 
 interface NData {
     id: number;
@@ -17,26 +18,32 @@ interface NData {
 }
 
 const NotificationScreen = () => {
+    const dispatch = useDispatch();
     const [nData, setNData] = useState<NData[]>([]);
     const [username, setUsername] = useState('');
     const [selectedItem, setSelectedItem] = useState<NData | null>(null);
     const navigation = useNavigation();
 
     const getNotifications = async () => {
+        dispatch(Reducers.setLoading(true));
         try {
             if (!username) {
                 console.log('Username not available yet');
+                dispatch(Reducers.setLoading(false));
                 return;
             }
 
             const result = await axios.get(`https://rohitsbackend.onrender.com/notifications/${username}`);
             if (result.data.success) {
+                dispatch(Reducers.setLoading(false));
                 setNData(result.data.notifications);
             }
             if (result.data.message === 'No notifications available for you') {
                 Toast('No notification available for you now')
+                dispatch(Reducers.setLoading(false));
             }
         } catch (error) {
+            dispatch(Reducers.setLoading(false));
             console.log("Error in getNotifications : ", error);
         }
     }
@@ -81,6 +88,7 @@ const NotificationScreen = () => {
     }, [username]);
 
     const handleDelete = async (item: NData) => {
+        dispatch(Reducers.setLoading(true));
         const email = await getUser();
         try {
             const res = await axios.delete('https://rohitsbackend.onrender.com/delete-notification', {
@@ -90,10 +98,12 @@ const NotificationScreen = () => {
                 Toast('Notification deleted');
                 setNData(prev => prev.filter(n => n.id !== item.id));
                 console.log('Deleted item data:', item);
+                dispatch(Reducers.setLoading(false));
             }
         } catch (error) {
             Toast('Failed to delete notification');
             console.log(error);
+            dispatch(Reducers.setLoading(false));
         }
     };
 
@@ -108,7 +118,7 @@ const NotificationScreen = () => {
             <TouchableOpacity activeOpacity={0.8}
                 onPress={() => handleDelete(item)}
             >
-                <AntDesign name='delete' size={20} color={"red"} />
+                <AntDesign name='delete' size={20} color={"red"} style={styles.deleteBtn} />
             </TouchableOpacity>
         </View>
     );
@@ -228,6 +238,9 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 8,
         paddingHorizontal: 40
+    },
+    deleteBtn: {
+        alignSelf: 'flex-end'
     }
 })
 
