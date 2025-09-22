@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, BackHandler, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, BackHandler, Alert, Image } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import axios from 'axios';
@@ -43,17 +43,15 @@ const OTP = () => {
             }
 
             const res = await axios.post("https://rohitsbackend.onrender.com/add-token", {
-                email: email, // Use signup email
+                email: email,
                 token: userToken,
             });
 
-            // Case 1: Token already exists → treat as success
             if (res.data.success === false && res.data.message === "Token already exists") {
                 console.log("Token already exists, continuing signup...");
                 return true;
             }
 
-            // Case 2: Token saved successfully
             if (res.data.success) {
                 console.log("Token saved:", res.data.data);
                 return true;
@@ -89,9 +87,7 @@ const OTP = () => {
         let interval: ReturnType<typeof setInterval> | null = null;
 
         if (timer > 0) {
-            interval = setInterval(() => {
-                setTimer(prev => prev - 1);
-            }, 1000);
+            interval = setInterval(() => setTimer(prev => prev - 1), 1000);
         }
 
         return () => {
@@ -99,28 +95,20 @@ const OTP = () => {
         };
     }, [timer]);
 
-    // Auto-focus first input on mount
+    // Auto-focus first input
     useEffect(() => {
-        setTimeout(() => {
-            inputs.current[0]?.focus();
-        }, 100);
+        setTimeout(() => inputs.current[0]?.focus(), 100);
     }, []);
 
     const handleChange = (text: string, index: number) => {
-        // Only allow single digits
-        if (text.length > 1) {
-            text = text.slice(-1);
-        }
+        if (text.length > 1) text = text.slice(-1);
 
         if (/^\d$/.test(text) || text === '') {
             const newOtp = [...otp];
             newOtp[index] = text;
             setOtp(newOtp);
 
-            // Auto-focus next input
-            if (text !== '' && index < 5) {
-                inputs.current[index + 1]?.focus();
-            }
+            if (text !== '' && index < 5) inputs.current[index + 1]?.focus();
         }
     };
 
@@ -132,34 +120,27 @@ const OTP = () => {
 
     const clearOtpInputs = () => {
         setOtp(['', '', '', '', '', '']);
-        setTimeout(() => {
-            inputs.current[0]?.focus();
-        }, 100);
+        setTimeout(() => inputs.current[0]?.focus(), 100);
     };
 
     const handleResend = async () => {
         if (isResending || timer > 0) return;
-
         try {
             setIsResending(true);
             clearOtpInputs();
             setTimer(60);
 
-            const res = await axios.post('https://rohitsbackend.onrender.com/send-otp', {
-                email,
-                name
-            });
+            const res = await axios.post('https://rohitsbackend.onrender.com/send-otp', { email, name });
 
-            if (res.data.success) {
-                Toast(res.data.message || 'OTP sent successfully');
-            } else {
+            if (res.data.success) Toast('OTP sent successfully');
+            else {
                 Toast(res.data.message || 'Failed to resend OTP');
-                setTimer(0); // Reset timer if failed
+                setTimer(0);
             }
         } catch (err: any) {
             console.error('Resend OTP error:', err);
             Toast(err?.response?.data?.message || err?.message || 'Error resending OTP');
-            setTimer(0); // Reset timer if failed
+            setTimer(0);
         } finally {
             setIsResending(false);
         }
@@ -167,28 +148,20 @@ const OTP = () => {
 
     const handleVerify = async () => {
         const otpCode = otp.join('');
-
         if (otpCode.length !== 6) {
             Toast('Please enter complete OTP');
             return;
         }
-
         if (isLoading) return;
 
         try {
             setIsLoading(true);
             dispatch(Reducers.setLoading(true));
 
-            const res = await axios.post('https://rohitsbackend.onrender.com/verify-otp', {
-                email,
-                otp: otpCode,
-                name
-            });
+            const res = await axios.post('https://rohitsbackend.onrender.com/verify-otp', { email, otp: otpCode, name });
 
             if (res.data.success) {
                 Toast('OTP verified successfully');
-
-                // First complete signup, then store token
                 await handleSignUp();
             } else {
                 Toast(res.data.message || 'Invalid OTP');
@@ -196,15 +169,6 @@ const OTP = () => {
             }
         } catch (err: any) {
             console.error('Verify OTP error:', err);
-
-            if (err.response?.status === 400) {
-                Toast(err.response.data?.message || 'Invalid OTP');
-            } else if (err.response?.status === 429) {
-                Toast('Too many attempts. Please try again later.');
-            } else {
-                Toast(err?.response?.data?.message || err?.message || 'Verification failed');
-            }
-
             clearOtpInputs();
         } finally {
             setIsLoading(false);
@@ -221,24 +185,12 @@ const OTP = () => {
                 dispatch(Reducers.setUser(true));
 
                 const tokenStored = await addTokenToDB();
-                if (!tokenStored) {
-                    console.warn('Token storage failed, but signup was successful');
-                }
+                if (!tokenStored) console.warn('Token storage failed, but signup was successful');
 
                 Toast('Account created successfully');
                 navigation.replace('Login');
             } else {
-                const errorCode = res.error?.code;
-                if (errorCode === 'auth/email-already-in-use') {
-                    Toast('Email already in use');
-                    navigation.replace('Login');
-                } else if (errorCode === 'auth/invalid-email') {
-                    Toast('Invalid email address');
-                } else if (errorCode === 'auth/weak-password') {
-                    Toast('Password too weak');
-                } else {
-                    Toast(res.error?.message || 'Account creation failed');
-                }
+                Toast(res.error?.message || 'Account creation failed');
                 console.error('Firebase signup error:', res.error);
             }
         } catch (err: any) {
@@ -251,57 +203,47 @@ const OTP = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>Enter OTP</Text>
+            <Image style={styles.img} source={require('../img/Media.jpg')} />
             <Text style={styles.emailText}>Sent to {email}</Text>
 
             <View style={styles.otpContainer}>
                 {otp.map((digit, index) => (
-                    <TextInput
+                    <View
                         key={index}
-                        ref={(ref: any) => (inputs.current[index] = ref)}
                         style={[
-                            styles.input,
-                            digit !== '' && styles.inputFilled
+                            styles.inputWrapper,
+                            digit !== '' && styles.inputWrapperFilled
                         ]}
-                        keyboardType="number-pad"
-                        maxLength={1}
-                        value={digit}
-                        onChangeText={(text) => handleChange(text, index)}
-                        onKeyPress={(e) => handleKeyPress(e, index)}
-                        editable={!isLoading}
-                        selectTextOnFocus
-                    />
+                    >
+                        <TextInput
+                            ref={(ref: any) => (inputs.current[index] = ref)}
+                            style={styles.input}
+                            keyboardType="number-pad"
+                            maxLength={1}
+                            value={digit}
+                            onChangeText={(text) => handleChange(text, index)}
+                            onKeyPress={(e) => handleKeyPress(e, index)}
+                            editable={!isLoading}
+                            selectTextOnFocus
+                        />
+                    </View>
                 ))}
             </View>
 
             <TouchableOpacity
-                style={[
-                    styles.verifyBtn,
-                    (!isOtpComplete || isLoading) && styles.disabledBtn
-                ]}
+                style={[styles.verifyBtn, (!isOtpComplete || isLoading) && styles.disabledBtn]}
                 onPress={handleVerify}
                 disabled={!isOtpComplete || isLoading}
             >
-                <Text style={styles.verifyText}>
-                    {isLoading ? 'Verifying...' : 'Verify OTP'}
-                </Text>
+                <Text style={styles.verifyText}>{isLoading ? 'Verifying...' : 'Verify OTP'}</Text>
             </TouchableOpacity>
 
             <View style={styles.resendContainer}>
                 {timer > 0 ? (
-                    <Text style={styles.timerText}>
-                        Resend OTP in {timer}s
-                    </Text>
+                    <Text style={styles.timerText}>Resend OTP in {timer}s</Text>
                 ) : (
-                    <TouchableOpacity
-                        onPress={handleResend}
-                        disabled={isResending}
-                        style={styles.resendButton}
-                    >
-                        <Text style={[
-                            styles.resendText,
-                            isResending && styles.disabledText
-                        ]}>
+                    <TouchableOpacity onPress={handleResend} disabled={isResending}>
+                        <Text style={[styles.resendText, isResending && styles.disabledText]}>
                             {isResending ? 'Sending...' : 'Resend OTP'}
                         </Text>
                     </TouchableOpacity>
@@ -312,89 +254,29 @@ const OTP = () => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
+    container: { flex: 1, justifyContent: 'flex-start', alignItems: 'center', padding: 20, backgroundColor: 'white', paddingTop: '25%' },
+    emailText: { marginBottom: 30, color: 'black', fontSize: 16, textAlign: 'center' },
+    otpContainer: { flexDirection: 'row', justifyContent: 'center', marginBottom: 40, width: '100%', maxWidth: 280 },
+    inputWrapper: {
+        width: 45,
+        height: 45,
+        marginHorizontal: 4,
+        borderRadius: 6,
+        borderWidth: 2,
+        borderColor: '#ddd',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 20,
-        backgroundColor: '#e1e3e5ff'
     },
-    header: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        marginBottom: 10,
-        color: '#333'
-    },
-    emailText: {
-        marginBottom: 30,
-        color: '#666',
-        fontSize: 16,
-        textAlign: 'center'
-    },
-    otpContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 40,
-        width: '100%',
-        maxWidth: 300
-    },
-    input: {
-        borderBottomWidth: 2,
-        borderColor: '#ddd',
-        fontSize: 22,
-        textAlign: 'center',
-        marginHorizontal: 5,
-        width: 45,
-        height: 50,
-        color: '#333',
-        fontWeight: 'bold'
-    },
-    inputFilled: {
-        borderColor: '#007AFF',
-    },
-    verifyBtn: {
-        backgroundColor: '#007AFF',
-        paddingVertical: 15,
-        paddingHorizontal: 40,
-        borderRadius: 12,
-        marginBottom: 20,
-        minWidth: 200,
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-    },
-    disabledBtn: {
-        backgroundColor: '#ccc',
-        elevation: 0,
-        shadowOpacity: 0,
-    },
-    verifyText: {
-        color: '#fff',
-        fontSize: 18,
-        fontWeight: 'bold',
-        textAlign: 'center'
-    },
-    resendContainer: {
-        marginTop: 10,
-        alignItems: 'center'
-    },
-    resendButton: {
-        padding: 10
-    },
-    timerText: {
-        color: '#666',
-        fontSize: 16
-    },
-    resendText: {
-        color: '#007AFF',
-        fontSize: 16,
-        fontWeight: '600'
-    },
-    disabledText: {
-        color: '#ccc'
-    }
+    inputWrapperFilled: { borderColor: '#007AFF' },
+    input: { fontSize: 20, fontWeight: 'bold', color: '#333', textAlign: 'center', width: '100%', height: '100%', padding: 0 },
+    verifyBtn: { backgroundColor: '#007AFF', paddingVertical: 15, paddingHorizontal: 40, borderRadius: 12, marginBottom: 20, minWidth: 200 },
+    disabledBtn: { backgroundColor: '#ccc' },
+    verifyText: { color: '#fff', fontSize: 18, fontWeight: 'bold', textAlign: 'center' },
+    resendContainer: { marginTop: 10, alignItems: 'center' },
+    timerText: { color: 'black', fontSize: 16 },
+    resendText: { color: 'red', fontSize: 16, fontWeight: '600' },
+    disabledText: { color: '#ccc' },
+    img: { height: 100, width: 150, alignSelf: 'center', marginBottom: 20 },
 });
 
 export default OTP;

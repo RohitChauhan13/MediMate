@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
     View,
     Text,
@@ -40,44 +40,80 @@ const Add = () => {
     const refresh = useSelector((state: any) => state.auth.refresh);
     const dispatch = useDispatch();
 
+    // Get username first
     useEffect(() => {
         const getUserName = async () => {
-            const email = await getUser();
-            setUsername(email);
+            try {
+                const email = await getUser();
+                console.log('Wishlist - Retrieved email:', email); // Debug log
+                setUsername(email);
+            } catch (error) {
+                console.error('Wishlist - Error getting user email:', error);
+                Alert.alert('Error', 'Failed to get user email');
+            }
         }
         getUserName();
     }, [])
 
-    const fetchWishlist = async () => {
+    // Fetch wishlist with proper dependency - FIXED infinite loop
+    const fetchWishlist = useCallback(async () => {
+        if (!username) {
+            console.log('Wishlist - No username available, skipping fetch');
+            return;
+        }
+
         try {
-            if (!refreshing) setRefreshing(true);
+            setRefreshing(true); // Remove condition that was causing loop
+            console.log('Wishlist - Fetching for username:', username); // Debug log
+
             const res = await axios.get(`https://rohitsbackend.onrender.com/show-wishlist/${username}`);
+
             if (res.data.success) {
                 const sorted = res.data.data.sort(
                     (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
                 );
                 setData(sorted);
                 setFilteredData(sorted);
+                console.log('Wishlist - Data fetched successfully:', sorted.length); // Debug log
+            } else {
+                console.log('Wishlist - API returned success false:', res.data.message);
+                if (res.data.message !== 'No data available') {
+                    Alert.alert('Info', res.data.message || 'No data available');
+                }
             }
-        } catch (error) {
-            Alert.alert('Something went wrong', 'Please check your internet connection');
+        } catch (error: any) {
+            console.error('Wishlist - Fetch error:', error);
+            if (error.response) {
+                console.error('Wishlist - Error response:', error.response.data);
+                Alert.alert('Error', error.response.data.message || 'Something went wrong');
+            } else {
+                Alert.alert('Network Error', 'Please check your internet connection');
+            }
         } finally {
             setRefreshing(false);
         }
-    };
+    }, [username]); // REMOVED refreshing from dependencies - this was causing infinite loop!
 
+    // Fetch wishlist only when username is available
     useEffect(() => {
-        fetchWishlist();
-        if (refresh) {
+        if (username) {
+            fetchWishlist();
+        }
+    }, [username, fetchWishlist]); // Trigger when username changes
+
+    // Handle refresh state properly
+    useEffect(() => {
+        if (refresh && username) {
+            fetchWishlist();
             dispatch(Reducers.setRefresh(false));
         }
-    }, [refresh]);
+    }, [refresh, username, fetchWishlist, dispatch]);
 
-    // search + sort filter logic
+    // Search + sort filter logic
     useEffect(() => {
         let temp = [...data];
 
-        // search filter
+        // Search filter
         if (search.trim() !== '') {
             const lower = search.toLowerCase();
             temp = temp.filter(
@@ -88,7 +124,7 @@ const Add = () => {
             );
         }
 
-        // sort filter
+        // Sort filter
         temp.sort((a, b) => {
             const dateA = new Date(a.created_at).getTime();
             const dateB = new Date(b.created_at).getTime();
@@ -117,19 +153,19 @@ const Add = () => {
         );
     };
 
+    // Show loading state while username is being fetched
+    if (!username) {
+        return (
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <Text style={styles.title}>Loading...</Text>
+            </View>
+        );
+    }
+
     return (
-        <View style={{ flex: 1, backgroundColor: '#e1e3e5ff' }}>
+        <View style={styles.container}>
             {/* Search + Sort Row */}
-            <View
-                style={{
-                    flexDirection: 'row',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    margin: 10,
-                    marginTop: 20,
-                    gap: 10
-                }}
-            >
+            <View style={styles.headerRow}>
                 <TI
                     placeholder="Search wishlist..."
                     value={search}
@@ -169,7 +205,7 @@ const Add = () => {
                 ListEmptyComponent={
                     <View style={{ flex: 1, marginTop: 50 }}>
                         <Text style={{ alignSelf: 'center', fontSize: 20, color: '#555' }}>
-                            No data available
+                            {refreshing ? 'Loading wishlist...' : 'No data available'}
                         </Text>
                     </View>
                 }
@@ -189,6 +225,18 @@ const Add = () => {
 };
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#e1e3e5ff'
+    },
+    headerRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        margin: 10,
+        marginTop: 20,
+        gap: 10
+    },
     card: {
         backgroundColor: 'white',
         borderRadius: 10,

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Animated, StyleSheet, Text, View } from "react-native";
+import { Animated, Image, StyleSheet, Text, View } from "react-native";
 import { getUser } from '../AsyncStorage/asyncStorage';
 import { Reducers, useDispatch } from "../redux/Index";
 import Ionicons from '@react-native-vector-icons/ionicons';
@@ -43,11 +43,8 @@ const SplashScreen = () => {
     return (
         <View style={styles.container}>
             <Animated.View style={{ transform: [{ scale: scaleAnim }], opacity: opacityAnim }}>
-                <Ionicons name="medkit" size={150} color="#eec841ff" />
+                <Image style={styles.img} source={require('./img/Media.jpg')} />
             </Animated.View>
-            <Animated.Text style={[styles.title, { opacity: opacityAnim }]}>
-                MediMate
-            </Animated.Text>
         </View>
     );
 };
@@ -65,6 +62,10 @@ const styles = StyleSheet.create({
         marginTop: 10,
         fontFamily: 'Merienda-Regular'
     },
+    img: {
+        width: 250,
+        height: 300
+    }
 });
 
 export default SplashScreen;

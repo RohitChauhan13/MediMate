@@ -5,6 +5,7 @@ import Wishlist from './RouteScreens/Wishlist';
 import Profile from './RouteScreens/Profile';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import FontAwesome from '@react-native-vector-icons/fontawesome';
+import HomeStack from './RouteScreens/HomeStack';
 
 const BottomTab = createBottomTabNavigator();
 
@@ -35,7 +36,7 @@ const Router = () => {
                 headerShown: false,
             })}
         >
-            <BottomTab.Screen name='Home' component={Home} />
+            <BottomTab.Screen name='Home' component={HomeStack} />
             <BottomTab.Screen name='Wishlist' component={Wishlist} />
             <BottomTab.Screen name='Profile' component={Profile} />
         </BottomTab.Navigator>

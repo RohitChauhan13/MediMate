@@ -22,10 +22,11 @@ import Toast from '../Components/Toast';
 import AntDesign from '@react-native-vector-icons/ant-design';
 import { requestNotificationPermission, getFcmToken } from '../Notification/notificationServise';
 import messaging from '@react-native-firebase/messaging';
-import { Alert } from 'react-native';
 import { onDisplayNotification } from '../Notification/notifee';
 import { checkAndRequestPermissions } from '../permissions/permissionAsk';
 import { getUser } from '../../AsyncStorage/asyncStorage';
+import Ionicons from '@react-native-vector-icons/ionicons';
+import { useNavigation, NavigationContainerProps } from '@react-navigation/native';
 
 interface Customer {
     id: number;
@@ -45,15 +46,24 @@ const Home: React.FC = () => {
     const [selectedUser, setSelectedUser] = useState<Customer | null>(null);
     const [username, setUsername] = useState<string | null>(null);
     const dispatch = useDispatch();
+    const navigation = useNavigation();
 
+    // First get username
     useEffect(() => {
         const getUserName = async () => {
-            const email = await getUser();
-            setUsername(email);
+            try {
+                const email = await getUser();
+                console.log('Retrieved email:', email);
+                setUsername(email);
+            } catch (error) {
+                console.error('Error getting user email:', error);
+                Toast('Failed to get user email');
+            }
         }
         getUserName();
     }, [])
 
+    // Setup permissions and notifications
     useEffect(() => {
         const requestPerms = async () => {
             const granted = await checkAndRequestPermissions();
@@ -64,49 +74,174 @@ const Home: React.FC = () => {
         requestPerms();
     }, []);
 
+    // Register FCM token for multi-device support
     useEffect(() => {
         const setupNotifications = async () => {
+            if (!username) return;
+
             const hasPermission = await requestNotificationPermission();
             if (hasPermission) {
-                const token = await getFcmToken();
+                try {
+                    const token = await getFcmToken();
+                    if (token) {
+                        // Register this device's token with the user's email
+                        const response = await axios.post(
+                            'https://rohitsbackend.onrender.com/add-token',
+                            {
+                                email: username,
+                                token: token
+                            }
+                        );
+
+                        if (response.data.success) {
+                            console.log('Token registered successfully');
+                        } else {
+                            console.log('Token registration failed:', response.data.message);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error registering token:', error);
+                }
             }
         };
+
         setupNotifications();
-    }, []);
+    }, [username]);
+
+    // Handle token refresh
+    useEffect(() => {
+        if (!username) return;
+
+        const unsubscribe = messaging().onTokenRefresh(async (newToken) => {
+            try {
+                // First remove old token if exists
+                const oldToken = await getFcmToken();
+                if (oldToken && oldToken !== newToken) {
+                    await axios.delete('https://rohitsbackend.onrender.com/remove-token', {
+                        data: { email: username, token: oldToken }
+                    });
+                }
+
+                // Add new token
+                await axios.post('https://rohitsbackend.onrender.com/add-token', {
+                    email: username,
+                    token: newToken
+                });
+
+                console.log('Token refreshed successfully');
+            } catch (error) {
+                console.error('Error refreshing token:', error);
+            }
+        });
+
+        return unsubscribe;
+    }, [username]);
+
+    // Clean up token on logout
+    useEffect(() => {
+        return () => {
+            // This cleanup function will run when component unmounts
+            const cleanupToken = async () => {
+                if (username) {
+                    try {
+                        const token = await getFcmToken();
+                        if (token) {
+                            await axios.delete('https://rohitsbackend.onrender.com/remove-token', {
+                                data: { email: username, token: token }
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error removing token on cleanup:', error);
+                    }
+                }
+            };
+
+            // Only clean up if user is logging out, not on app background
+            // You might want to handle this differently based on your logout flow
+        };
+    }, [username]);
 
     useEffect(() => {
         const unsubscribe = messaging().onMessage(async remoteMessage => {
             console.log('Foreground Message:', remoteMessage);
+            await saveNotificationIntoDb(remoteMessage?.notification?.title || '', remoteMessage?.notification?.body || '')
             onDisplayNotification(remoteMessage?.notification?.title || '', remoteMessage?.notification?.body || '');
         });
 
         return unsubscribe;
     }, []);
 
+    const saveNotificationIntoDb = useCallback(async (title: string, body: string) => {
+        try {
+            const email = await getUser();
+            if (!email) {
+                console.log('Cannot get email from asyncStorage');
+                return;
+            }
+
+            const result = await axios.post(
+                `https://rohitsbackend.onrender.com/add-notification/${email}`,
+                {
+                    title,
+                    body
+                }
+            );
+
+            if (result.data.success) {
+                console.log('Successfully notification saved');
+            } else {
+                console.log('Error while storing notification');
+            }
+        } catch (error) {
+            console.log('Error in saveNotificationIntoDb : ', error);
+        }
+    }, []);
+
     const fetchUsers = useCallback(async () => {
+        if (!username) {
+            console.log('No username available, skipping fetch');
+            return;
+        }
+
         dispatch(Reducers.setLoading(true));
         try {
             setLoading(true);
+            console.log('Fetching users for:', username);
+
             const res = await axios.get(`https://rohitsbackend.onrender.com/users/${username}`);
+
             if (res.data.success) {
                 // Sort by ID in descending order to show newest first
                 const sortedUsers = res.data.users.sort((a: any, b: any) => b.id - a.id);
                 setData(sortedUsers);
                 setFilteredData(sortedUsers);
+                console.log('Users fetched successfully:', sortedUsers.length);
+            } else {
+                console.log('API returned success false:', res.data.message);
+                Toast(res.data.message || 'Failed to fetch users');
             }
         } catch (err: any) {
-            console.log('Fetch error:', err.message);
-            Toast('Failed to fetch users');
+            console.error('Fetch error:', err);
+            if (err.response) {
+                console.error('Error response:', err.response.data);
+                Toast(err.response.data.message || 'Failed to fetch users');
+            } else {
+                Toast('Network error. Please check your internet connection.');
+            }
         } finally {
             setLoading(false);
             dispatch(Reducers.setLoading(false));
         }
-    }, []);
+    }, [username, dispatch]);
 
+    // Fetch users only when username is available
     useEffect(() => {
-        fetchUsers();
-    }, [fetchUsers, refresh]);
+        if (username) {
+            fetchUsers();
+        }
+    }, [username, refresh, fetchUsers]);
 
+    // Search filter
     useEffect(() => {
         if (search.trim() === '') {
             setFilteredData(data);
@@ -139,6 +274,15 @@ const Home: React.FC = () => {
         </TouchableOpacity>
     );
 
+    // Show loading state while username is being fetched
+    if (!username) {
+        return (
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <Text style={styles.title}>Loading...</Text>
+            </View>
+        );
+    }
+
     return (
         <KeyboardAvoidingView
             style={{ flex: 1 }}
@@ -146,10 +290,17 @@ const Home: React.FC = () => {
         >
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={styles.container}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-                        <Image source={require('../img/logo.png')} style={styles.imgLogo} />
-                        <Text style={styles.title}>Medimate</Text>
-                        <Text style={styles.tagLine}>made with  ♡</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10, alignItems: 'center' }}>
+                        <View style={{ flexDirection: 'row' }}>
+                            <Image source={require('../img/Media2.png')} style={styles.imgLogo} />
+                            <Text style={styles.title}>Medimate</Text>
+                            <Text style={styles.tagLine}>made with  ♡</Text>
+                        </View>
+                        <TouchableOpacity activeOpacity={0.7}
+                            onPress={() => navigation.navigate('Notification')}
+                        >
+                            <Ionicons name='notifications-sharp' size={30} style={{ marginRight: 10 }} />
+                        </TouchableOpacity>
                     </View>
                     <View style={{
                         flexDirection: 'row',
@@ -182,7 +333,11 @@ const Home: React.FC = () => {
                         keyboardShouldPersistTaps="handled"
                         contentContainerStyle={{ paddingBottom: 10 }}
                         showsVerticalScrollIndicator={false}
-                        ListEmptyComponent={<Text style={styles.empty}>No Customers Found</Text>}
+                        ListEmptyComponent={
+                            <Text style={styles.empty}>
+                                {loading ? 'Loading customers...' : 'No Customers Found'}
+                            </Text>
+                        }
                         refreshControl={
                             <RefreshControl refreshing={loading} onRefresh={fetchUsers} />
                         }
@@ -211,7 +366,7 @@ const Home: React.FC = () => {
                                     Toast('Update failed');
                                 }
                             } catch (err: any) {
-                                Toast(err.message || 'Something went wrong');
+                                Toast(err.response?.data?.message || err.message || 'Something went wrong');
                             } finally {
                                 dispatch(Reducers.setLoading(false));
                             }
@@ -233,7 +388,7 @@ const Home: React.FC = () => {
                                     Toast('Delete failed');
                                 }
                             } catch (err: any) {
-                                Toast(err.message || 'Something went wrong');
+                                Toast(err.response?.data?.message || err.message || 'Something went wrong');
                             } finally {
                                 dispatch(Reducers.setLoading(false));
                             }

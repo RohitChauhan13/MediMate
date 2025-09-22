@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import React, { useRef, useState } from 'react';
 import { TextInput } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
@@ -45,7 +45,7 @@ const SignUp = () => {
             );
 
             if (res.data.success) {
-                Toast(res.data.message);
+                Toast("OTP sent successfully");
                 navigation.replace('OTP', { email, password, name });
             } else {
                 Toast(res.data.message);
@@ -60,8 +60,7 @@ const SignUp = () => {
     return (
         <View style={{ flex: 1, padding: 15, backgroundColor: '#e1e3e5ff' }}>
             <View style={styles.form}>
-                <Text style={{ fontSize: 18, alignSelf: 'center', fontWeight: '600' }}>Welcome to</Text>
-                <Text style={styles.header}>Medimate</Text>
+                <Image style={styles.img} source={require('../img/Media.jpg')} />
                 <TextInput
                     autoFocus={true}
                     ref={nameRef}
@@ -155,7 +154,7 @@ const styles = StyleSheet.create({
     form: {
         borderRadius: 12,
         width: '100%',
-        marginTop: '20%',
+        marginTop: '15%',
         padding: 10,
         backgroundColor: '#fff',
         elevation: 8,
@@ -186,8 +185,13 @@ const styles = StyleSheet.create({
     eye: {
         position: 'absolute',
         right: 32,
-        top: 273,
+        top: 295,
     },
+    img: {
+        height: 100,
+        width: 150,
+        alignSelf: 'center',
+    }
 });
 
 export default SignUp;
