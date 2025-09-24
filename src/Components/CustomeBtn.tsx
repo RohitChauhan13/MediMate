@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
     btn: {
         borderRadius: 50,
         padding: 15,
-        backgroundColor: '#eec841ff',
+        backgroundColor: '#57d6bbff',
         position: 'absolute',
         bottom: 20,
         right: 20,

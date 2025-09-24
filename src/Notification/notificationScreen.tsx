@@ -7,7 +7,6 @@ import { getUser } from '../../AsyncStorage/asyncStorage';
 import Toast from '../Components/Toast';
 import AntDesign from '@react-native-vector-icons/ant-design';
 import { useDispatch, Reducers } from '../../redux/Index';
-import reducer from '../../redux/MySlice';
 
 interface NData {
     id: number;
@@ -21,7 +20,6 @@ const NotificationScreen = () => {
     const dispatch = useDispatch();
     const [nData, setNData] = useState<NData[]>([]);
     const [username, setUsername] = useState('');
-    const [selectedItem, setSelectedItem] = useState<NData | null>(null);
     const navigation = useNavigation();
 
     const getNotifications = async () => {
@@ -39,7 +37,6 @@ const NotificationScreen = () => {
                 setNData(result.data.notifications);
             }
             if (result.data.message === 'No notifications available for you') {
-                Toast('No notification available for you now')
                 dispatch(Reducers.setLoading(false));
             }
         } catch (error) {
@@ -115,11 +112,15 @@ const NotificationScreen = () => {
                 <Text style={styles.date}>{formatDate(item.created_at)}</Text>
             </View>
             <Text style={styles.body}>{item.notificationbody}</Text>
-            <TouchableOpacity activeOpacity={0.8}
-                onPress={() => handleDelete(item)}
-            >
-                <AntDesign name='delete' size={20} color={"red"} style={styles.deleteBtn} />
-            </TouchableOpacity>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+                <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() => handleDelete(item)}
+                >
+                    <AntDesign name='delete' size={20} color="red" />
+                </TouchableOpacity>
+            </View>
         </View>
     );
 

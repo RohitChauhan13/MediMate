@@ -89,10 +89,11 @@ const Home: React.FC = () => {
         const unsubscribe = messaging().onMessage(async remoteMessage => {
             console.log('Foreground Message:', remoteMessage);
             onDisplayNotification(remoteMessage?.notification?.title || '', remoteMessage?.notification?.body || '');
+            dispatch(Reducers.setRefresh(!refresh));
         });
 
         return unsubscribe;
-    }, []);
+    }, [dispatch]);
 
 
     const fetchUsers = useCallback(async () => {
@@ -178,7 +179,7 @@ const Home: React.FC = () => {
     }, [username, refresh]);
 
     const renderItem = ({ item }: { item: Customer }) => (
-        <TouchableOpacity onPress={() => setSelectedUser(item)}>
+        <TouchableOpacity activeOpacity={0.9} onPress={() => setSelectedUser(item)}>
             <View style={styles.card}>
                 <Text style={styles.name}>{item.name}</Text>
                 <Text style={styles.sub}>Medicines: {item.medicines}</Text>
@@ -268,12 +269,13 @@ const Home: React.FC = () => {
                         keyExtractor={(item, index) => item.id?.toString() || index.toString()}
                         renderItem={renderItem}
                         keyboardShouldPersistTaps="handled"
-                        contentContainerStyle={{ paddingBottom: 10 }}
+                        contentContainerStyle={{ paddingBottom: 10, flex: 1 }}
                         showsVerticalScrollIndicator={false}
                         ListEmptyComponent={
-                            <Text style={styles.empty}>
-                                {loading ? 'Loading customers...' : 'No Customers Found'}
-                            </Text>
+                            <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
+                                <Text style={styles.emptyText}>No users for now</Text>
+                                <Image style={styles.img} source={require('../img/team.png')} />
+                            </View>
                         }
                         refreshControl={
                             <RefreshControl refreshing={loading} onRefresh={fetchUsers} />
@@ -368,12 +370,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: 'black',
     },
-    empty: {
-        textAlign: 'center',
-        marginTop: 50,
-        fontSize: 16,
-        color: 'black',
-    },
     imgLogo: {
         width: 50,
         height: 50,
@@ -390,6 +386,15 @@ const styles = StyleSheet.create({
         marginTop: 18,
         marginLeft: 3,
         fontFamily: 'GreatVibes-Regular',
+        fontSize: 20
+    },
+    img: {
+        width: 200,
+        height: 200,
+        resizeMode: 'contain'
+    },
+    emptyText: {
+        fontFamily: 'Merienda-Regular',
         fontSize: 20
     }
 });

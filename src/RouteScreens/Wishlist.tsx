@@ -7,7 +7,8 @@ import {
     StyleSheet,
     TouchableOpacity,
     RefreshControl,
-    TextInput as TI
+    TextInput as TI,
+    Image
 } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import CustomeBtnWishlist from '../Components/CustomeBtnWishlist';
@@ -138,6 +139,7 @@ const Add = () => {
         const formattedDate = new Date(item.created_at).toDateString();
         return (
             <TouchableOpacity
+                activeOpacity={0.9}
                 style={styles.card}
                 onPress={() => {
                     setSelectedItem(item);
@@ -146,8 +148,8 @@ const Add = () => {
             >
                 <Text style={styles.title}>{item.name}</Text>
                 <Text>Medicines: {item.medicines}</Text>
-                <Text>Mobile: {item.mobile || 'not available'}</Text>
-                <Text>Quantity: {item.qty || 'not available'}</Text>
+                <Text>Mobile: {item.mobile || 'N/A'}</Text>
+                <Text>Quantity: {item.qty || 'N/A'}</Text>
                 <Text>Date: {formattedDate}</Text>
             </TouchableOpacity>
         );
@@ -197,16 +199,15 @@ const Add = () => {
                 data={filteredData}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderItem}
-                contentContainerStyle={{ padding: 15 }}
+                contentContainerStyle={{ padding: 15, flex: 1 }}
                 showsVerticalScrollIndicator={false}
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={fetchWishlist} />
                 }
                 ListEmptyComponent={
-                    <View style={{ flex: 1, marginTop: 50 }}>
-                        <Text style={{ alignSelf: 'center', fontSize: 20, color: '#555' }}>
-                            {refreshing ? 'Loading wishlist...' : 'No data available'}
-                        </Text>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={styles.emptyText}>No item in wishlist for now</Text>
+                        <Image style={styles.img} source={require('../img/wishlist.png')} />
                     </View>
                 }
             />
@@ -261,12 +262,22 @@ const styles = StyleSheet.create({
     sortBtn: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#eec841ff',
+        backgroundColor: '#57d6bbff',
         paddingHorizontal: 10,
         paddingVertical: 10,
         borderRadius: 8,
         elevation: 10,
     },
+    img: {
+        width: 200,
+        height: 200,
+        resizeMode: 'contain'
+    },
+    emptyText: {
+        marginBottom: 10,
+        fontSize: 20,
+        fontFamily: 'Merienda-Regular'
+    }
 });
 
 export default Add;

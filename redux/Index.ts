@@ -1,4 +1,4 @@
-import { setWishModal, setRefresh, setAddModal, setLoading, setUser, setSplashScreenStatus, setOtpVerify } from "./MySlice";
+import { setAddDebtModal, setWishModal, setRefresh, setAddModal, setLoading, setUser, setSplashScreenStatus, setOtpVerify } from "./MySlice";
 import { Store, useDispatch, useSelector } from './Store'
 
 const Reducers = {
@@ -8,7 +8,8 @@ const Reducers = {
     setOtpVerify,
     setAddModal,
     setRefresh,
-    setWishModal
+    setWishModal,
+    setAddDebtModal
 };
 
 export { Reducers, Store, useDispatch, useSelector }

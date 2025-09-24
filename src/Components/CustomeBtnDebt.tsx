@@ -1,16 +1,15 @@
-import { TouchableOpacity, StyleSheet } from 'react-native'
+import { TouchableOpacity, StyleSheet, Image } from 'react-native'
 import React from 'react'
 import { Reducers, useDispatch } from '../../redux/Index'
-import FontAwesome from '@react-native-vector-icons/fontawesome'
 
-const CustomeBtnWishlist = () => {
-    const dispatch = useDispatch()
+const CustomeBtnDebt = () => {
+    const dispatch = useDispatch();
     return (
         <TouchableOpacity style={styles.btn}
             activeOpacity={0.75}
-            onPress={() => dispatch(Reducers.setWishModal(true))}
+            onPress={() => dispatch(Reducers.setAddDebtModal(true))}
         >
-            <FontAwesome name='opencart' size={25} color={'black'} style={{ fontWeight: 'bold' }} />
+            <Image source={require('../img/creditor.png')} style={styles.img} />
         </TouchableOpacity>
     )
 }
@@ -28,9 +27,12 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 3,
-        height: 60,
-        width: 60,
     },
+    img: {
+        width: 25,
+        height: 25,
+        resizeMode: 'contain',
+    }
 });
 
-export default CustomeBtnWishlist
+export default CustomeBtnDebt

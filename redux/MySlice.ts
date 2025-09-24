@@ -8,6 +8,7 @@ interface AuthSliceProp {
     addModal: boolean;
     refresh: boolean;
     wishShowModal: boolean;
+    addDebtModal: boolean;
 }
 
 const initialState: AuthSliceProp = {
@@ -17,7 +18,8 @@ const initialState: AuthSliceProp = {
     otpVerify: false,
     addModal: false,
     refresh: false,
-    wishShowModal: false
+    wishShowModal: false,
+    addDebtModal: false,
 };
 
 const AuthSlice = createSlice({
@@ -44,9 +46,12 @@ const AuthSlice = createSlice({
         },
         setWishModal: (state, action: PayloadAction<boolean>) => {
             state.wishShowModal = action.payload
-        }
+        },
+        setAddDebtModal: (state, action: PayloadAction<boolean>) => {
+            state.addDebtModal = action.payload
+        },
     },
 });
 
-export const { setWishModal, setRefresh, setAddModal, setLoading, setUser, setSplashScreenStatus, setOtpVerify } = AuthSlice.actions;
+export const { setAddDebtModal, setWishModal, setRefresh, setAddModal, setLoading, setUser, setSplashScreenStatus, setOtpVerify } = AuthSlice.actions;
 export default AuthSlice.reducer;

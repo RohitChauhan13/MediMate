@@ -114,13 +114,14 @@ const Profile = () => {
             <View style={styles.content}>
                 <Text style={styles.header}>Profile</Text>
                 <TouchableOpacity
+                    activeOpacity={0.9}
                     onPress={() => setImageModalVisible(true)}
                     style={styles.profileImageContainer}
                 >
                     {imgUrl ? (
                         <Image source={{ uri: imgUrl }} style={styles.profileImage} />
                     ) : (
-                        <AntDesign name='user' size={120} color="black" />
+                        <Image style={styles.defImg} source={require('../img/man.png')} />
                     )}
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => setChangeNameModalVisible(true)} style={{ marginTop: 10 }}>
@@ -249,7 +250,7 @@ const styles = StyleSheet.create({
     container: { flex: 1, padding: 20, justifyContent: 'space-between', backgroundColor: '#e1e3e5ff' },
     content: { alignItems: 'center', marginTop: 50 },
     header: { fontSize: 24, fontWeight: 'bold', color: 'black' },
-    profileImageContainer: { justifyContent: 'center', alignItems: 'center', marginTop: 20, borderRadius: 100, width: 200, height: 200, overflow: 'hidden', elevation: 10 },
+    profileImageContainer: { justifyContent: 'center', alignItems: 'center', marginTop: 20, borderRadius: 100, width: 200, height: 200, overflow: 'hidden', elevation: 5 },
     profileImage: { width: '100%', height: '100%', borderRadius: 100 },
     logoutBtn: { backgroundColor: 'tomato', paddingVertical: 12, borderRadius: 10, alignItems: 'center' },
     logoutText: { color: 'black', fontSize: 18, fontWeight: 'bold' },
@@ -269,7 +270,11 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#000',
     },
-
+    defImg: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'contain'
+    }
 });
 
 export default Profile;
