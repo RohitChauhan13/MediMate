@@ -529,7 +529,7 @@ const Dept = () => {
             <Modal visible={showConfirmDeletePaidModal} transparent animationType='slide'>
                 <KeyboardAvoidingView style={styles.overlay}>
                     <View style={styles.form}>
-                        <Text style={styles.msg}>Do you really want do delete this paid record?</Text>
+                        <Text style={styles.msg}>Do you really want to delete this paid record?</Text>
                         <View style={styles.btnContainer}>
                             <TouchableOpacity style={[styles.modalBtn, { backgroundColor: 'tomato', width: '48%' }]} onPress={handlePaidDelete}>
                                 <Text style={styles.modalBtnText}>Delete</Text>
@@ -545,7 +545,7 @@ const Dept = () => {
             <Modal visible={showConfirmDeleteUnpaidModal} transparent animationType='slide'>
                 <KeyboardAvoidingView style={styles.overlay}>
                     <View style={styles.form}>
-                        <Text style={styles.msg}>Do you really want do delete this unpaid record?</Text>
+                        <Text style={styles.msg}>Do you really want to delete this unpaid record?</Text>
                         <View style={styles.btnContainer}>
                             <TouchableOpacity style={[styles.modalBtn, { backgroundColor: 'tomato', width: '48%' }]} onPress={handleUnpaidDelete}>
                                 <Text style={styles.modalBtnText}>Delete</Text>
